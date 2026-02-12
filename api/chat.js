@@ -1,4 +1,4 @@
-// api/chat.js - FREE VERSION using Hugging Face
+// api/chat.js - FIXED VERSION with correct Hugging Face URL
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
@@ -11,9 +11,9 @@ export default async function handler(req, res) {
   }
 
   try {
-    // Using Hugging Face Inference API (100% FREE, no credit card)
+    // Using NEW Hugging Face URL (router.huggingface.co)
     const response = await fetch(
-      'https://api-inference.huggingface.co/models/mistralai/Mixtral-8x7B-Instruct-v0.1',
+      'https://router.huggingface.co/models/mistralai/Mixtral-8x7B-Instruct-v0.1',
       {
         method: 'POST',
         headers: {
