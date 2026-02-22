@@ -1,56 +1,35 @@
-// api/chat.js - FIXED VERSION with correct Hugging Face URL
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
   const { question } = req.body;
-
-  if (!question) {
-    return res.status(400).json({ error: 'Question is required' });
-  }
+  if (!question) return res.status(400).json({ error: 'Question is required' });
 
   try {
-    // Using NEW Hugging Face URL (router.huggingface.co)
     const response = await fetch(
-      'https://router.huggingface.co/models/mistralai/Mixtral-8x7B-Instruct-v0.1',
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
       {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${process.env.HUGGINGFACE_API_KEY}`
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          inputs: `You are a caring, knowledgeable pediatric resource for new parents. Answer this question about babies in a warm, reassuring way. Be concise but thorough. If it's a medical concern, remind them to consult their pediatrician for personalized advice.
-
-Question: ${question}
-
-Provide a helpful, calming response (maximum 3 paragraphs):`,
-          parameters: {
-            max_new_tokens: 500,
-            temperature: 0.7,
-            return_full_text: false
-          }
+          system_instruction: {
+            parts: [{ text: `You are a warm, calm assistant for first-time parents. Answer questions about baby care, development, and health in simple, reassuring language. Keep answers concise. Always remind parents to consult their pediatrician for serious concerns.` }]
+          },
+          contents: [{ parts: [{ text: question }] }]
         })
       }
     );
 
     const data = await response.json();
-    
-    if (!response.ok) {
-      console.error('HuggingFace Error:', data);
-      throw new Error(data.error || 'API request failed');
-    }
 
-    // HuggingFace returns an array with generated text
-    const aiResponse = data[0]?.generated_text || 
-                       'I\'m having trouble right now. Please try again in a moment.';
+    if (!response.ok) throw new Error(data.error?.message || 'Gemini API error');
 
-    res.status(200).json({ response: aiResponse.trim() });
+    const text = data.candidates[0].content.parts[0].text;
+    return res.status(200).json({ response: text });
+
   } catch (error) {
-    console.error('API Error:', error);
-    res.status(500).json({ 
-      error: 'I\'m having trouble connecting right now. Please try again in a moment.' 
-    });
+    console.error('Error:', error);
+    return res.status(500).json({ error: error.message });
   }
 }
