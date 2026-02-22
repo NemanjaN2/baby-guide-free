@@ -132,8 +132,8 @@ export default function BabyGuideApp() {
         </div>
 
         <div className="mt-4 text-center">
-          <a href="/download.html" className="text-sm text-purple-600 hover:text-purple-800 underline">
-            📱 Download iOS & macOS App
+          <a href="/" className="text-sm text-purple-600 hover:text-purple-800 underline">
+            📱 Download iOS, macOS & Android App
           </a>
         </div>
       </div>
