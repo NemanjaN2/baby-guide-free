@@ -11,10 +11,20 @@ export default async function handler(req, res) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          system_instruction: {
-            parts: [{ text: 'You are a warm, calm assistant for first-time parents. Answer questions about baby care, development, and health in simple, reassuring language. Keep answers concise. Always remind parents to consult their pediatrician for serious concerns.' }]
-          },
-          contents: [{ parts: [{ text: question }] }]
+          contents: [
+            {
+              role: 'user',
+              parts: [{ text: 'You are a warm, calm assistant for first-time parents. Answer questions about baby care, development, and health in simple, reassuring language. Keep answers concise. Always remind parents to consult their pediatrician for serious concerns. Understood?' }]
+            },
+            {
+              role: 'model',
+              parts: [{ text: 'Understood! I am here to help first-time parents with warm, clear answers about baby care.' }]
+            },
+            {
+              role: 'user',
+              parts: [{ text: question }]
+            }
+          ]
         })
       }
     );
