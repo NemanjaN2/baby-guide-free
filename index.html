@@ -1,14 +1,407 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Baby Guide - Your calm companion for parenting questions. Get answers about baby care, health, and development." />
-    <title>Baby Guide - Help for First-Time Parents</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TinyAnswers – Help for First-Time Parents</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,500;0,700;1,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --cream: #fdf8f3;
+      --soft-purple: #b89ee8;
+      --purple: #8b5cf6;
+      --pink: #e879a0;
+      --dark: #1a1025;
+      --mid: #4a3d6b;
+      --text: #2d2040;
+      --muted: #8b7aa8;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--cream);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Subtle noise texture */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Blobs */
+    .blob {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.18;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .blob-1 { width: 500px; height: 500px; background: var(--purple); top: -150px; right: -100px; }
+    .blob-2 { width: 400px; height: 400px; background: var(--pink); bottom: -100px; left: -100px; }
+    .blob-3 { width: 300px; height: 300px; background: #a5f3d4; top: 40%; left: 30%; }
+
+    main { position: relative; z-index: 1; }
+
+    /* NAV */
+    nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 24px 48px;
+    }
+    .logo {
+      font-family: 'Fraunces', serif;
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--purple);
+      letter-spacing: -0.5px;
+    }
+    .logo span { color: var(--pink); }
+
+    /* HERO */
+    .hero {
+      text-align: center;
+      padding: 80px 24px 60px;
+      max-width: 760px;
+      margin: 0 auto;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(139, 92, 246, 0.1);
+      border: 1px solid rgba(139, 92, 246, 0.2);
+      border-radius: 100px;
+      padding: 6px 16px;
+      font-size: 13px;
+      color: var(--purple);
+      font-weight: 500;
+      margin-bottom: 32px;
+      letter-spacing: 0.2px;
+    }
+
+    .hero h1 {
+      font-family: 'Fraunces', serif;
+      font-size: clamp(48px, 8vw, 80px);
+      font-weight: 700;
+      line-height: 1.05;
+      letter-spacing: -2px;
+      color: var(--dark);
+      margin-bottom: 24px;
+    }
+    .hero h1 em {
+      font-style: italic;
+      font-weight: 300;
+      color: var(--purple);
+    }
+
+    .hero p {
+      font-size: 18px;
+      line-height: 1.7;
+      color: var(--muted);
+      max-width: 520px;
+      margin: 0 auto 48px;
+      font-weight: 300;
+    }
+
+    /* DOWNLOAD BUTTONS */
+    .download-row {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+
+    .btn-download {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px 28px;
+      border-radius: 16px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      font-weight: 500;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      border: none;
+      cursor: pointer;
+    }
+
+    .btn-primary {
+      background: var(--purple);
+      color: white;
+      box-shadow: 0 8px 32px rgba(139, 92, 246, 0.35);
+    }
+    .btn-primary:hover {
+      background: #7c3aed;
+      transform: translateY(-2px);
+      box-shadow: 0 12px 40px rgba(139, 92, 246, 0.45);
+    }
+
+    .btn-secondary {
+      background: white;
+      color: var(--text);
+      border: 1.5px solid rgba(139, 92, 246, 0.2);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+    }
+    .btn-secondary:hover {
+      border-color: var(--purple);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+    }
+
+    .btn-icon {
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .btn-info { display: flex; flex-direction: column; align-items: flex-start; }
+    .btn-info small { font-size: 11px; opacity: 0.65; font-weight: 400; }
+    .btn-info strong { font-size: 15px; }
+
+    .web-link {
+      font-size: 14px;
+      color: var(--muted);
+      margin-top: 8px;
+    }
+    .web-link a {
+      color: var(--purple);
+      text-decoration: none;
+      font-weight: 500;
+      border-bottom: 1px solid rgba(139, 92, 246, 0.3);
+      transition: border-color 0.2s;
+    }
+    .web-link a:hover { border-color: var(--purple); }
+
+    /* APP PREVIEW CARD */
+    .preview-wrap {
+      max-width: 440px;
+      margin: 64px auto 0;
+      background: white;
+      border-radius: 28px;
+      padding: 32px;
+      box-shadow: 0 24px 80px rgba(74, 61, 107, 0.12), 0 4px 16px rgba(0,0,0,0.04);
+      border: 1px solid rgba(139, 92, 246, 0.08);
+    }
+
+    .preview-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+    .preview-icon {
+      width: 44px;
+      height: 44px;
+      background: linear-gradient(135deg, #b89ee8, #e879a0);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+    }
+    .preview-title { font-family: 'Fraunces', serif; font-size: 20px; font-weight: 700; color: var(--dark); }
+    .preview-sub { font-size: 12px; color: var(--muted); }
+
+    .chat-bubble {
+      border-radius: 18px;
+      padding: 12px 16px;
+      font-size: 14px;
+      line-height: 1.5;
+      margin-bottom: 10px;
+      max-width: 85%;
+    }
+    .bubble-user {
+      background: var(--purple);
+      color: white;
+      margin-left: auto;
+      border-bottom-right-radius: 4px;
+    }
+    .bubble-ai {
+      background: #f5f0ff;
+      color: var(--text);
+      border-bottom-left-radius: 4px;
+    }
+    .bubble-label {
+      font-size: 11px;
+      color: var(--muted);
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    /* FEATURES */
+    .features {
+      max-width: 900px;
+      margin: 100px auto 0;
+      padding: 0 24px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 24px;
+    }
+
+    .feature-card {
+      background: white;
+      border-radius: 20px;
+      padding: 28px;
+      border: 1px solid rgba(139, 92, 246, 0.08);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .feature-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 40px rgba(74, 61, 107, 0.12);
+    }
+
+    .feature-emoji { font-size: 32px; margin-bottom: 14px; }
+    .feature-card h3 {
+      font-family: 'Fraunces', serif;
+      font-size: 18px;
+      font-weight: 500;
+      color: var(--dark);
+      margin-bottom: 8px;
+    }
+    .feature-card p { font-size: 14px; color: var(--muted); line-height: 1.6; }
+
+    /* DISCLAIMER */
+    .disclaimer {
+      max-width: 600px;
+      margin: 80px auto 0;
+      padding: 20px 28px;
+      background: rgba(59, 130, 246, 0.05);
+      border: 1px solid rgba(59, 130, 246, 0.15);
+      border-radius: 16px;
+      text-align: center;
+      font-size: 13px;
+      color: #4a6fa5;
+      line-height: 1.6;
+    }
+
+    /* FOOTER */
+    footer {
+      text-align: center;
+      padding: 60px 24px 40px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+    footer strong { color: var(--purple); font-family: 'Fraunces', serif; }
+
+    @media (max-width: 600px) {
+      nav { padding: 20px 24px; }
+      .download-row { flex-direction: column; align-items: center; }
+      .btn-download { width: 100%; max-width: 300px; justify-content: center; }
+    }
+  </style>
+</head>
+<body>
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+  <div class="blob blob-3"></div>
+
+  <main>
+    <nav>
+      <div class="logo">Tiny<span>Answers</span></div>
+    </nav>
+
+    <section class="hero">
+      <div class="badge">✨ Free for first-time parents</div>
+
+      <h1>Calm answers for<br><em>tiny</em> questions</h1>
+
+      <p>Why does my baby have a soft spot? Is this rash normal? TinyAnswers gives you warm, clear answers — anytime, anywhere.</p>
+
+      <div class="download-row">
+        <a href="TinyAnswers.dmg" class="btn-download btn-primary" download>
+          <div class="btn-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="3" width="20" height="14" rx="2"/><polyline points="8 21 12 17 16 21"/>
+            </svg>
+          </div>
+          <div class="btn-info">
+            <small>Download for</small>
+            <strong>macOS</strong>
+          </div>
+        </a>
+
+        <a href="TinyAnswers.ipa" class="btn-download btn-secondary" download>
+          <div class="btn-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="5" y="2" width="14" height="20" rx="2"/><circle cx="12" cy="17" r="1"/>
+            </svg>
+          </div>
+          <div class="btn-info">
+            <small>Download for</small>
+            <strong>iOS (IPA)</strong>
+          </div>
+        </a>
+      </div>
+
+      <p class="web-link">Or use it instantly in your browser → <a href="https://baby-guide-free.vercel.app" target="_blank">baby-guide-free.vercel.app</a></p>
+
+      <!-- App Preview -->
+      <div class="preview-wrap">
+        <div class="preview-header">
+          <div class="preview-icon">🍼</div>
+          <div>
+            <div class="preview-title">TinyAnswers</div>
+            <div class="preview-sub">Your calm parenting companion</div>
+          </div>
+        </div>
+
+        <div class="chat-bubble bubble-user">Why does my baby have a soft spot on their head?</div>
+
+        <div class="bubble-label">🍼 TinyAnswers</div>
+        <div class="chat-bubble bubble-ai">The soft spot (fontanelle) is completely normal! It allows your baby's skull to flex during birth and gives the brain room to grow. It usually closes between 12–18 months. Always consult your pediatrician if you have concerns.</div>
+      </div>
+    </section>
+
+    <!-- Features -->
+    <section class="features">
+      <div class="feature-card">
+        <div class="feature-emoji">💬</div>
+        <h3>Ask anything</h3>
+        <p>Soft spots, rashes, sleep, feeding — no question is too small or too silly.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-emoji">🧘</div>
+        <h3>Calm, clear answers</h3>
+        <p>No scary medical jargon. Just warm, reassuring guidance written for new parents.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-emoji">📱</div>
+        <h3>iOS, macOS & Web</h3>
+        <p>Available on all your devices. Use the app or open it in any browser, instantly.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-emoji">🆓</div>
+        <h3>Completely free</h3>
+        <p>No subscriptions, no ads, no account needed. Just answers when you need them.</p>
+      </div>
+    </section>
+
+    <div class="disclaimer">
+      <strong>⚕️ Medical disclaimer:</strong> TinyAnswers provides general information only. It is not a substitute for professional medical advice. Always consult your pediatrician for concerns specific to your baby's health.
+    </div>
+
+    <footer>
+      Made with ♥ for new parents everywhere · <strong>TinyAnswers</strong>
+    </footer>
+  </main>
+</body>
 </html>
